@@ -208,7 +208,7 @@ class _EditprofileState extends State<Editprofile> {
                     gradient: const LinearGradient( begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                       colors: [
-                       const Color.fromARGB(255, 18, 25, 223),
+                        Color.fromARGB(255, 18, 25, 223),
                        Color.fromARGB(255, 109, 3, 127)
                     ]),
                   
@@ -238,7 +238,7 @@ class _EditprofileState extends State<Editprofile> {
     final mail = mailcontroller.text.trim();
     final password = passwordcontroller.text.trim();
     final id = widget.data.id;
-    print(id);
+  
     if (name.isEmpty || mail.isEmpty || password.isEmpty) {
       return;
     }

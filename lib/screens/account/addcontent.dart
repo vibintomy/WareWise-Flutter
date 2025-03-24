@@ -8,9 +8,10 @@ import 'package:myproject1/db/functions/db_functions.dart';
 import 'package:myproject1/db/model/data_model.dart';
 
 class Addingpage extends StatefulWidget {
-  Addingpage({Key? key}) : super(key: key);
+  const Addingpage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _AddingpageState createState() => _AddingpageState();
 }
 
@@ -29,7 +30,7 @@ class _AddingpageState extends State<Addingpage> {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
       } else {
-        print('No image selected.');
+        throw Exception('No Image Selected');
       }
     });
   }
@@ -63,7 +64,6 @@ class _AddingpageState extends State<Addingpage> {
                               size: 50,
                               color: Colors.grey,
                             ),
-                           
                     ),
                   ),
                 ],
@@ -87,7 +87,7 @@ class _AddingpageState extends State<Addingpage> {
                   key: formKey,
                   child: Column(
                     children: [
-         const             SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       const Center(
@@ -117,45 +117,43 @@ class _AddingpageState extends State<Addingpage> {
                       const SizedBox(
                         height: 30,
                       ),
-                     
-                     InkWell(
-                      hoverColor: const Color.fromARGB(255, 78, 2, 92),
-                      focusColor: Colors.blue,
-                  onTap: () async{
-                      if (formKey.currentState!.validate()) {
+                      InkWell(
+                        hoverColor: const Color.fromARGB(255, 78, 2, 92),
+                        focusColor: Colors.blue,
+                        onTap: () async {
+                          if (formKey.currentState!.validate()) {
                             buttonclicked();
-                           
+
                             setState(() {});
-                           
+
                             Navigator.pop(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const Account()));
                           }
-                       },
-                 child: Container(
-                  height: 50,
-                  width: 150,
-                padding: const EdgeInsets.all(12.0),
-                   decoration: BoxDecoration(
-                    gradient: const LinearGradient( begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                      colors: [
-                       Color.fromARGB(255, 18, 25, 223),
-                       Color.fromARGB(255, 109, 3, 127)
-                    ]),
-                  
-                     borderRadius: BorderRadius.circular(8.0),
-                     ),
-                   child: const Center(
-                     child: Text(
-                                      'Save',
-                      style: TextStyle(color: Colors.white),
-                                    ),
-                   ),
-           ),
-          ),
-                     
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 150,
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  Color.fromARGB(255, 18, 25, 223),
+                                  Color.fromARGB(255, 109, 3, 127)
+                                ]),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Save',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -177,6 +175,4 @@ class _AddingpageState extends State<Addingpage> {
         items: items, itemcount: itemcount, image: _image?.path ?? '');
     addContent(itemvalues);
   }
-
-  
 }

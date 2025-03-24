@@ -1,5 +1,8 @@
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:myproject1/db/functions/db_functions.dart';
+import 'package:myproject1/db/model/data_model.dart';
 import 'package:myproject1/screens/account/salesExpenses.dart';
 import 'package:myproject1/screens/home/inventorysummary.dart';
 import 'package:myproject1/screens/home/tabBar.dart';
@@ -37,19 +40,65 @@ class _HomepageState extends State<Homepage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min, // Set the main axis size to min
                 children: [
-                  const Align(
+                  Align(
                     alignment: Alignment.topLeft,
                     child: Row(
                       children: [
-                        Text(
-                          'Home',
+                        ValueListenableBuilder<List<datamodels>>(
+                          valueListenable: editlistnotifier,
+                          builder: (BuildContext ctx, List<datamodels> editList,
+                              Widget? child) {
+                            if (editList.isEmpty) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            datamodels data = editList.last;
+                            return Row(
+                              children: [
+                                SizedBox(
+                                  height: 50,
+                                  width: 50,
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 138, 26, 26),
+                                    backgroundImage: (data.image != null &&
+                                            data.image!.isNotEmpty)
+                                        ? FileImage(File(data.image!))
+                                        : null,
+                                    child: (data.image == null ||
+                                            data.image!.isEmpty)
+                                        ? const Icon(
+                                            Icons.person,
+                                            size: 50.0,
+                                            color: Colors.black,
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Hi, ${data.username.toString().toUpperCase()}👋',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                )
+                              ],
+                            );
+                          },
+                        ),
+                        const Text(
+                          '',
                           style: TextStyle(
                             color: Color.fromARGB(255, 87, 109, 255),
                             fontWeight: FontWeight.bold,
                             fontSize: 35,
                           ),
                         ),
-                        SizedBox(width: 190),
+                        const SizedBox(width: 190),
                       ],
                     ),
                   ),
@@ -59,35 +108,34 @@ class _HomepageState extends State<Homepage> {
                     children: [
                       Expanded(
                         child: _buildCard(
-                          title: 'SALES INVOICE',
-                          color: const Color.fromARGB(255, 251, 105, 20),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const tabBarPage(),
-                              ),
-                            );
-                          },
-                          icon: Icons.receipt, // Icon for Sales Invoice
-                        ),
+                            title: 'SALES INVOICE',
+                            color: const Color.fromARGB(255, 251, 105, 20),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const tabBarPage(),
+                                ),
+                              );
+                            },
+                            image: Image.asset('assets/procurement.png')),
                       ),
                       const SizedBox(width: 20),
                       Expanded(
                         child: _buildCard(
-                          title: 'Income & Expenses',
-                          color: const Color.fromARGB(255, 253, 79, 236),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SalesExpenses(),
-                              ),
-                            );
-                          },
-                          icon:
-                              Icons.attach_money, // Icon for Income & Expenses
-                        ),
+                            title: 'Income & Expenses',
+                            color: const Color.fromARGB(255, 253, 79, 236),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SalesExpenses(),
+                                ),
+                              );
+                            },
+                            image: Image.asset(
+                                'assets/increase.png') // Icon for Income & Expenses
+                            ),
                       ),
                     ],
                   ),
@@ -103,9 +151,10 @@ class _HomepageState extends State<Homepage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>const Inventorysummary()));
+                                    builder: (context) =>
+                                        const Inventorysummary()));
                           },
-                          icon: Icons.inventory)
+                          image: Image.asset('assets/supplier.png'))
                     ],
                   )
                 ],
@@ -121,7 +170,7 @@ class _HomepageState extends State<Homepage> {
     required String title,
     required Color color,
     required Function() onTap,
-    required IconData icon,
+    required Widget image,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -144,14 +193,10 @@ class _HomepageState extends State<Homepage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: 1.0,
-              child: Icon(
-                icon,
-                size: 40,
-                color: Colors.white,
-              ),
+            SizedBox(
+              height: 50,
+              width: 50,
+              child: image,
             ),
             const SizedBox(height: 10),
             Text(

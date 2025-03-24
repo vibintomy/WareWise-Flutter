@@ -142,20 +142,34 @@ class _EditcategoryState extends State<Editcategory> {
                   const SizedBox(
                     height: 30,
                   ),
-                  ElevatedButton(
-                    // style: ElevatedButton.styleFrom(primary:Color.fromARGB(
-                    //                                     255, 108, 110, 208)),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                  InkWell(
+                      hoverColor: const Color.fromARGB(255, 78, 2, 92),
+                      focusColor: Colors.blue,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
                         buttonclicked();
                         Navigator.pop(context, true); 
                       }
-                    },
-                    child: const Text(
-                      'Update',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                       },
+                 child: Container(
+                padding: const EdgeInsets.all(12.0),
+                   decoration: BoxDecoration(
+                    gradient: const LinearGradient( begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                      colors: [
+                       Color.fromARGB(255, 18, 25, 223),
+                       Color.fromARGB(255, 109, 3, 127)
+                    ]),
+                  
+                     borderRadius: BorderRadius.circular(8.0),
+                     ),
+                   child: const Text(
+                 'Save',
+                    style: TextStyle(color: Colors.white),
+               ),
+           ),
+          ),
+                 
                 ],
               ),
             ),
@@ -169,7 +183,7 @@ class _EditcategoryState extends State<Editcategory> {
   final item = itemcontroller1.text.trim();
   final itemcount = itemcountcontroller2.text.trim();
   final id = widget.data.id1;
-  print(id);
+ 
   if (item.isEmpty || itemcount.isEmpty) {
     return;
   }
@@ -178,7 +192,6 @@ class _EditcategoryState extends State<Editcategory> {
     itemcount: itemcount,
     image: image?.path ?? '',
   );
-  await editdetails2(id!, editing1); // Wait for the editing process to complete
-  print('data edited');
+  await editdetails2(id!, editing1);
 }
 }
