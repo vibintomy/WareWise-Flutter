@@ -341,7 +341,7 @@ class _SalesInvoiceState extends State<SalesInvoice> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => Invoice1(data2: data1),
+              builder: (context) => ImprovedInvoice(data2: data1),
             ),
           );
           setState(() {});

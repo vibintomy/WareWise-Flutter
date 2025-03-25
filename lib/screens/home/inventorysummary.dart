@@ -1,292 +1,279 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:myproject1/db/model/data_model.dart';
 
-class productreturnmodel {
-  String? totalstock;
-  String? damagedproducts;
-  String? returnproducts;
-  int? stockouts;
+class InventorySummaryChart extends StatelessWidget {
+  final Future<List<productmodel>> Function() getProductList;
 
-  productreturnmodel(
-      {this.totalstock,
-      this.damagedproducts,
-      this.returnproducts,
-      this.stockouts});
-}
-
-Future<List<productreturnmodel>> getproductreturns() async {
-  // Replace with your actual data fetching logic
-  return [
-    productreturnmodel(
-        totalstock: '100',
-        damagedproducts: '20',
-        returnproducts: '30',
-        stockouts: 10),
-    productreturnmodel(
-        totalstock: '200',
-        damagedproducts: '40',
-        returnproducts: '50',
-        stockouts: 20),
-    productreturnmodel(
-        totalstock: '300',
-        damagedproducts: '60',
-        returnproducts: '70',
-        stockouts: 30),
-  ];
-}
-
-class Inventorysummary extends StatelessWidget {
-  const Inventorysummary({super.key});
+  const InventorySummaryChart({Key? key, required this.getProductList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: AppBar(
-            backgroundColor: const Color.fromARGB(255, 108, 110, 208),
-            title: const Text(
-              'Inventory Summary',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-            centerTitle: true,
-          ),
-        ),
-        body: FutureBuilder<List<productreturnmodel>>(
-          future: getproductreturns(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100], // Light background for a modern look
+      body: FutureBuilder<List<productmodel>>(
+        future: getProductList(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.redAccent,
+                    size: 80,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Error: ${snapshot.error}',
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            List<productmodel>? products = snapshot.data;
+            if (products == null || products.isEmpty) {
               return Center(
-                child: Text('Error: ${snapshot.error}'),
+                child: Text(
+                  'No Inventory Data Available',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[600],
+                  ),
+                ),
               );
             } else {
-              List<productreturnmodel>? products = snapshot.data;
-              if (products == null || products.isEmpty) {
-                return const Center(
-                  child: Text('No data is available'),
-                );
-              } else {
-                // Summing up the values
-                double totalStock = products
-                    .map((p) => double.parse(p.totalstock ?? '0'))
-                    .reduce((a, b) => a + b);
-                double damagedProducts = products
-                    .map((p) => double.parse(p.damagedproducts ?? '0'))
-                    .reduce((a, b) => a + b);
-                double returnProducts = products
-                    .map((p) => double.parse(p.returnproducts ?? '0'))
-                    .reduce((a, b) => a + b);
-                double stockouts = products
-                    .map((p) => (p.stockouts ?? 0).toDouble())
-                    .reduce((a, b) => a + b);
+              return _buildInventorySummary(context, products);
+            }
+          }
+        },
+      ),
+    );
+  }
 
-                List<PieChartSectionData> sections = [];
+  Widget _buildInventorySummary(BuildContext context, List<productmodel> products) {
+    int totalProducts = products.length;
+    num totalStock = 0;
+    int stockoutsCount = 0;
 
-                if (totalStock > 0) {
-                  sections.add(PieChartSectionData(
-                    value: totalStock,
-                    color: Colors.blue,
-                    radius: 70,
-                    badgeWidget: _badgeWidget(
-                        totalStock,
-                        totalStock /
-                            (totalStock +
-                                damagedProducts +
-                                returnProducts +
-                                stockouts)),
-                  ));
-                }
-                if (damagedProducts > 0) {
-                  sections.add(PieChartSectionData(
-                    value: damagedProducts,
-                    color: Colors.red,
-                    radius: 70,
-                    badgeWidget: _badgeWidget(
-                        damagedProducts,
-                        damagedProducts /
-                            (totalStock +
-                                damagedProducts +
-                                returnProducts +
-                                stockouts)),
-                  ));
-                }
-                if (returnProducts > 0) {
-                  sections.add(PieChartSectionData(
-                    value: returnProducts,
-                    color: Colors.green,
-                    radius: 70,
-                    badgeWidget: _badgeWidget(
-                        returnProducts,
-                        returnProducts /
-                            (totalStock +
-                                damagedProducts +
-                                returnProducts +
-                                stockouts)),
-                  ));
-                }
-                if (stockouts > 0) {
-                  sections.add(PieChartSectionData(
-                    value: stockouts,
-                    color: Colors.orange,
-                    radius: 70,
-                    badgeWidget: _badgeWidget(
-                        stockouts,
-                        stockouts /
-                            (totalStock +
-                                damagedProducts +
-                                returnProducts +
-                                stockouts)),
-                  ));
-                }
+    for (var product in products) {
+      try {
+        num productStock = num.tryParse(product.stock1.toString()) ?? 0;
+        totalStock += productStock;
+        if (productStock == 0) stockoutsCount++;
+      } catch (e) {
+        print('Error parsing stock for product: ${product}');
+      }
+    }
 
-                return Column(
+    List<PieChartSectionData> sections = [];
+    if (totalStock > 0) {
+      sections.add(
+        PieChartSectionData(
+          color: Colors.teal,
+          value: totalStock.toDouble(),
+          title: 'Available\n$totalStock',
+          radius: 120,
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+    if (stockoutsCount > 0) {
+      sections.add(
+        PieChartSectionData(
+          color: Colors.redAccent,
+          value: stockoutsCount.toDouble(),
+          title: 'Out of Stock\n$stockoutsCount',
+          radius: 120,
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             SizedBox(height: 20,),
+            // Header
+            Center(
+              child: const Text(
+                'Inventory Overview',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Summary Card with Shadow and Gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Colors.blueAccent, Colors.blue],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
                   children: [
-                    const SizedBox(
-                      height: 30,
-                    ),
                     const Text(
-                      'Inventory Data',
+                      'Summary',
                       style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.brown),
-                    ),
-                    SizedBox(
-                      height: 300,
-                      width: 300,
-                      child: PieChart(
-                        PieChartData(
-                          sections: sections,
-                          sectionsSpace: 2,
-                          centerSpaceRadius: 60,
-                        ),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                color: Colors.blue,
-                              ),
-                              const Text(
-                                '  Total Stock',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                color: Colors.red,
-                              ),
-                              const Text(
-                                '  Damaged Products',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                color: Colors.green,
-                              ),
-                              const Text(
-                                '  Return Products',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                color: Colors.orange,
-                              ),
-                              const Text(
-                                '  Stockouts',
-                                style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      hoverColor: const Color.fromARGB(255, 78, 2, 92),
-                      focusColor: Colors.blue,
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [
-                                Color.fromARGB(255, 18, 25, 223),
-                                Color.fromARGB(255, 109, 3, 127)
-                              ]),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: const Text(
-                          'Ok, I Understand',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStat('Total Products', totalProducts, Colors.white),
+                        _buildStat('In Stock', totalStock, Colors.teal[100]!),
+                        _buildStat('Out of Stock', stockoutsCount, Colors.red[100]!),
+                      ],
                     ),
                   ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Pie Chart Section
+            const Text(
+              'Inventory Distribution',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 15),
+            SizedBox(
+              height: 300,
+              child: PieChart(
+                PieChartData(
+                  sections: sections,
+                  centerSpaceRadius: 50,
+                  sectionsSpace: 4,
+                  borderData: FlBorderData(show: false),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Product Details Section
+            const Text(
+              'Product Details',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 15),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                var product = products[index];
+                bool isOutOfStock = (num.tryParse(product.stock1.toString()) ?? 0) == 0;
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isOutOfStock ? Colors.redAccent : Colors.teal,
+                      child: Text(
+                        product.itemname1?[0] ?? '?',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(
+                      product.itemname1 ?? 'Unknown Product',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    trailing: Text(
+                      'Stock: ${product.stock1}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isOutOfStock ? Colors.redAccent : Colors.teal,
+                      ),
+                    ),
+                  ),
                 );
-              }
-            }
-          },
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _badgeWidget(double value, double percentage) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: Text(
-        '${(percentage * 100).toStringAsFixed(2)}%',
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
+  Widget _buildStat(String label, num value, Color color) {
+    return Column(
+      children: [
+        Text(
+          value.toString(),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.white70,
+          ),
+        ),
+      ],
     );
   }
 }

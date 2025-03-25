@@ -230,6 +230,6 @@ class _EditproductState extends State<Editproduct> {
       sellingprice: sellingprice,
     );
     await editdetails4(id!, editing3);
-    print('data edited');
+
   }
 }

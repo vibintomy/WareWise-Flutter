@@ -70,6 +70,9 @@ class productmodel {
   @HiveField(9)
   int? totalproducts;
 
+  @HiveField(10)
+  int purchaseCount;
+
   productmodel(
       {required this.itemname1,
       this.discription1,
@@ -80,7 +83,8 @@ class productmodel {
       this.categoryid,
       this.productid,
       required this.currentprice,
-      required this.sellingprice});
+      required this.sellingprice,
+      this.purchaseCount=0});
 }
 
 @HiveType(typeId: 4)
@@ -175,28 +179,29 @@ class productreturnmodel {
       required this.totalreturnproducts,
       required this.stockouts});
 }
+
 @HiveType(typeId: 7)
 class InvoiceModel {
   @HiveField(0)
   final String customername;
-  
+
   @HiveField(1)
   final String date;
-  
+
   @HiveField(2)
   final double totalamount;
-  
+
   @HiveField(3)
   double discount;
-  
+
   @HiveField(4)
   final List<Map<String, dynamic>> invoice;
-  
+
   @HiveField(5)
-   int? id7;
-  
+  int? id7;
+
   @HiveField(6)
-   int? invoiceid;
+  int? invoiceid;
 
   InvoiceModel({
     required this.customername,

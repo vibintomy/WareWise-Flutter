@@ -272,71 +272,64 @@ Future<void> addDailyupdates(dailyupdatesmodel value) async {
   final addedid = await dUpdates.add(value);
 
   if (addedid != null) {
-    dailyupdatesNotifier.value = List<dailyupdatesmodel>.from(dailyupdatesNotifier.value)
-      ..add(value);
-      dailyupdatesNotifier.notifyListeners();
+    dailyupdatesNotifier.value =
+        List<dailyupdatesmodel>.from(dailyupdatesNotifier.value)..add(value);
+    dailyupdatesNotifier.notifyListeners();
   }
 }
 
 Future<List<dailyupdatesmodel>> getDailyupdates() async {
   try {
     final dUpdates = await Hive.openBox<dailyupdatesmodel>('dailyupdates_db');
-    List<dailyupdatesmodel> dailyupdates =
-       dUpdates.values.toList(); 
-    await dUpdates.close(); 
+    List<dailyupdatesmodel> dailyupdates = dUpdates.values.toList();
+    await dUpdates.close();
     return dailyupdates;
   } catch (e) {
     print('Error fetching data: $e');
-    return []; 
+    return [];
   }
 }
 
-
-
-ValueNotifier<List<productreturnmodel>> productReturnNotifier = ValueNotifier([]);
+ValueNotifier<List<productreturnmodel>> productReturnNotifier =
+    ValueNotifier([]);
 
 Future<void> addproductreturns(productreturnmodel value) async {
   final PRmodel = await Hive.openBox<productreturnmodel>('productReturn_db');
 
-  final id =  productReturnNotifier .value.length;
+  final id = productReturnNotifier.value.length;
   value.id6 = id;
 
-  final addedid = await PRmodel .add(value);
+  final addedid = await PRmodel.add(value);
 
   if (addedid != null) {
-    productReturnNotifier.value = List<productreturnmodel>.from(productReturnNotifier.value)
-      ..add(value);
-      productReturnNotifier.notifyListeners();
+    productReturnNotifier.value =
+        List<productreturnmodel>.from(productReturnNotifier.value)..add(value);
+    productReturnNotifier.notifyListeners();
   }
 }
-
-
 
 Future<List<productreturnmodel>> getproductreturns() async {
   try {
     final PRmodel = await Hive.openBox<productreturnmodel>('productReturn_db');
-    List<productreturnmodel> productreturns =
-      PRmodel.values.toList(); 
-    await PRmodel.close(); 
+    List<productreturnmodel> productreturns = PRmodel.values.toList();
+    await PRmodel.close();
     return productreturns;
   } catch (e) {
     print('Error fetching data: $e');
-    return []; 
+    return [];
   }
 }
-
 
 Future<void> deleteproductreturn(int id) async {
   try {
     final PRmodel = await Hive.openBox<productreturnmodel>('productReturn_db');
     await PRmodel.delete(id);
-     productReturnNotifier.value =
-         productReturnNotifier.value.where((item) => item.id6 != id).toList();
+    productReturnNotifier.value =
+        productReturnNotifier.value.where((item) => item.id6 != id).toList();
   } catch (e) {
     print('Error deleting product: $e');
   }
 }
-
 
 ///invoice
 ValueNotifier<List<InvoiceModel>> invoicenotifier = ValueNotifier([]);
@@ -356,17 +349,15 @@ Future<void> addinvoice(InvoiceModel value) async {
   }
 }
 
-
 Future<List<InvoiceModel>> getinvoicelist() async {
   try {
     final invoiceBox = await Hive.openBox<InvoiceModel>('invoice_db');
-    List<InvoiceModel> invoice =
-        invoiceBox.values.toList(); 
-    await invoiceBox.close(); 
+    List<InvoiceModel> invoice = invoiceBox.values.toList();
+    await invoiceBox.close();
     return invoice;
   } catch (e) {
     print('Error fetching data: $e');
-    return []; 
+    return [];
   }
 }
 
@@ -374,9 +365,37 @@ Future<void> deleteinvoice(int id) async {
   try {
     final invoiceBox = await Hive.openBox<InvoiceModel>('invoice_db');
     await invoiceBox.delete(id);
-   invoicenotifier.value =
+    invoicenotifier.value =
         invoicenotifier.value.where((item) => item.id7 != id).toList();
   } catch (e) {
     print('Error deleting product: $e');
+  }
+}
+
+Future<void> purchasedProduct(int productid) async {
+  try {
+    final productBox = await Hive.openBox<productmodel>('product_db');
+    final product = productBox.values.firstWhere((p) => p.id2 == productid);
+
+    product.purchaseCount += 1;
+    await productBox.put(product.id2, product);
+
+    productListNotifier.value = List<productmodel>.from(productBox.values);
+    await productBox.close();
+  } catch (e) {
+    throw 'No values found';
+  }
+}
+
+Future<List<productmodel>> getTopPurchases() async {
+  try {
+    final productBox = await Hive.openBox<productmodel>('product_db');
+    List<productmodel> products = productBox.values.toList();
+    products.sort((a, b) => b.purchaseCount.compareTo(a.purchaseCount));
+    await productBox.close();
+    return products;
+  } catch (e) {
+    print('No valus found');
+    return [];
   }
 }

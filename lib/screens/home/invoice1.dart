@@ -3,15 +3,15 @@ import 'package:myproject1/db/functions/db_functions.dart';
 import 'package:myproject1/db/model/data_model.dart';
 import 'package:myproject1/screens/home/showdialog.dart';
 
-class Invoice1 extends StatefulWidget {
+class ImprovedInvoice extends StatefulWidget {
   final productmodel? data2;
-  const Invoice1({Key? key, required this.data2});
+  const ImprovedInvoice({Key? key, required this.data2});
 
   @override
-  State<Invoice1> createState() => _Invoice1State();
+  State<ImprovedInvoice> createState() => _ImprovedInvoiceState();
 }
 
-class _Invoice1State extends State<Invoice1> {
+class _ImprovedInvoiceState extends State<ImprovedInvoice> {
   TextEditingController customernamecontroller = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController dateController = TextEditingController();
@@ -19,11 +19,9 @@ class _Invoice1State extends State<Invoice1> {
   late List<itemsmodel> itemsList;
   late List<productmodel> productsList;
   List<Map<String, dynamic>> invoiceList = [];
-  itemsmodel? selectedCategory;
-  productmodel? selectedProduct;
   final formKey = GlobalKey<FormState>();
-  double discount = 0.0; // Track discount
-  double totalPrice = 0.0; // Track total price
+  double discount = 0.0;
+  double totalPrice = 0.0;
 
   @override
   void initState() {
@@ -33,19 +31,11 @@ class _Invoice1State extends State<Invoice1> {
     _fetchData();
   }
 
-  @override
-  void dispose() {
-    customernamecontroller.dispose();
-    discountController.dispose();
-    dateController.dispose();
-    super.dispose();
-  }
-
   Future<void> _fetchData() async {
     try {
       final items = await getItemList();
       final products = await getproductList();
-      if (!mounted) return; // Check if the widget is still mounted
+      if (!mounted) return;
       setState(() {
         itemsList = items;
         productsList = products;
@@ -61,8 +51,6 @@ class _Invoice1State extends State<Invoice1> {
       builder: (context) => ShowDialogBox(
         itemsList: itemsList,
         productsList: productsList,
-        selectedCategory: selectedCategory,
-        selectedProduct: selectedProduct,
         price: 0.0,
         quantity: 0,
       ),
@@ -71,7 +59,7 @@ class _Invoice1State extends State<Invoice1> {
     if (result != null) {
       setState(() {
         invoiceList.add(result);
-        _updateTotalPrice(); // Update total price whenever a new item is added
+        _updateTotalPrice();
       });
     }
   }
@@ -83,17 +71,14 @@ class _Invoice1State extends State<Invoice1> {
       double discountedPrice = calculateDiscountedPrice(itemPrice, discount);
       totalPrice += discountedPrice;
     }
-    if (!mounted) return; // Check if the widget is still mounted
-    setState(() {}); // Update the state to reflect the new total price
+    if (!mounted) return;
+    setState(() {});
   }
 
   double calculateDiscountedPrice(double originalPrice, double discount) {
-    if (discount <= 0) {
-      return originalPrice;
-    } else {
-      double discountedAmount = originalPrice * (discount / 100);
-      return originalPrice - discountedAmount;
-    }
+    if (discount <= 0) return originalPrice;
+    double discountedAmount = originalPrice * (discount / 100);
+    return originalPrice - discountedAmount;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -102,187 +87,29 @@ class _Invoice1State extends State<Invoice1> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.deepPurple,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
     if (pickedDate != null) {
-      if (!mounted) return; // Check if the widget is still mounted
+      if (!mounted) return;
       setState(() {
         dateController.text = pickedDate.toString().split(" ")[0];
       });
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Bill Invoice',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: const Color.fromARGB(255, 108, 110, 208),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Customer Name',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  controller: customernamecontroller,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the customer name';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter Customer Name',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Date of Purchase',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () => _selectDate(context),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: dateController,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Select Date',
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Divider(),
-                const SizedBox(height: 20),
-                DataTable(
-                  columnSpacing: 24,
-                  horizontalMargin: 15,
-                  border: TableBorder.all(color: Colors.grey.shade300),
-                  columns: const [
-                    DataColumn(
-                        label: Text(
-                      'Category',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )),
-                    DataColumn(
-                        label: Text('Product',
-                            style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(
-                        label: Text('Quantity',
-                            style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(
-                        label: Text('Price',
-                            style: TextStyle(fontWeight: FontWeight.bold))),
-                  ],
-                  rows: invoiceList.map((invoice) {
-                    double originalPrice = invoice['price'];
-                    double discountedPrice =
-                        calculateDiscountedPrice(originalPrice, discount);
-                    return DataRow(cells: [
-                      DataCell(Text(invoice['category'])),
-                      DataCell(Text(invoice['product'])),
-                      DataCell(Text(invoice['quantity'].toString())),
-                      DataCell(Text(discountedPrice.toStringAsFixed(2))),
-                    ]);
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Discount%',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: discountController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Enter the discount ';
-                    }
-                    return null;
-                  },
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Discount (%)',
-                  ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    setState(() {
-                      discount = double.tryParse(value) ?? 0.0;
-                      _updateTotalPrice();
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    'Total Price: ${totalPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: InkWell(
-                    hoverColor: const Color.fromARGB(255, 78, 2, 92),
-                    focusColor: Colors.blue,
-                    onTap: () {
-                      if (formKey.currentState!.validate()) {
-                        buttonclicked();
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 150,
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color.fromARGB(255, 18, 25, 223),
-                              Color.fromARGB(255, 109, 3, 127)
-                            ]),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Save',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showInvoiceDialog,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Future<void> buttonclicked() async {
+   Future<void> buttonclicked() async {
     final date = dateController.text.trim();
     final customername = customernamecontroller.text.trim();
     final discountText = discountController.text.trim();
@@ -301,9 +128,12 @@ class _Invoice1State extends State<Invoice1> {
     }).toList();
 
     if (date.isEmpty || customername.isEmpty || invoiceData.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Please fill in all required fields.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all required fields.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -318,16 +148,22 @@ class _Invoice1State extends State<Invoice1> {
     try {
       await addinvoice(invoiceupdates);
       await _decrementProductStock();
-      if (!mounted) return; // Check if the widget is still mounted
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Invoice saved successfully.'),
-      ));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Invoice saved successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (error) {
       print('Error saving invoice: $error');
-      if (!mounted) return; // Check if the widget is still mounted
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Failed to save invoice. Please try again.'),
-      ));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save invoice. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -339,6 +175,7 @@ class _Invoice1State extends State<Invoice1> {
       final product = productsList.firstWhere(
         (product) => product.itemname1 == productName,
       );
+      
       if (product == null) {
         print('Product not found: $productName');
         continue;
@@ -364,4 +201,265 @@ class _Invoice1State extends State<Invoice1> {
     // Fetch updated products list to refresh UI
     await _fetchData();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          'Create Invoice',
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            color: Colors.white,
+            letterSpacing: 1.2,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.deepPurple.shade400,
+                Colors.deepPurple.shade700,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Customer Name Input
+                      _buildSectionTitle('Customer Details'),
+                      const SizedBox(height: 10),
+                      _buildTextFormField(
+                        controller: customernamecontroller,
+                        labelText: 'Customer Name',
+                        hintText: 'Enter Customer Name',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter the customer name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Date Picker
+                      _buildSectionTitle('Purchase Date'),
+                      const SizedBox(height: 10),
+                      _buildDatePickerField(context),
+                      const SizedBox(height: 15),
+
+                      // Invoice Items Table
+                      _buildSectionTitle('Invoice Items'),
+                      const SizedBox(height: 10),
+                      _buildInvoiceItemsTable(),
+                      const SizedBox(height: 15),
+
+                      // Discount Input
+                      _buildSectionTitle('Discount'),
+                      const SizedBox(height: 10),
+                      _buildTextFormField(
+                        controller: discountController,
+                        labelText: 'Discount Percentage',
+                        hintText: 'Enter Discount (%)',
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            discount = double.tryParse(value) ?? 0.0;
+                            _updateTotalPrice();
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 15),
+
+                      // Total Price
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20, 
+                            vertical: 10
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            'Total Price: \₹${totalPrice.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 18, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple.shade800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Save Button
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () async{
+                            if (formKey.currentState!.validate()) {
+                              buttonclicked();
+                              Navigator.pop(context);
+                              final products = await getproductList();
+              if (products.isNotEmpty) {
+                await purchasedProduct(products[0].id2!);
+              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40, 
+                              vertical: 12
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5,
+                          ),
+                          child: const Text(
+                            'Save Invoice',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showInvoiceDialog,
+        icon: const Icon(Icons.add,color: Colors.white,),
+        label: const Text('Add Item',style: TextStyle(color: Colors.white),),
+        backgroundColor: Colors.deepPurple,
+      ),
+    );
+  }
+
+  // Helper Widgets
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16, 
+        fontWeight: FontWeight.bold,
+        color: Colors.deepPurple.shade700,
+      ),
+    );
+  }
+
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String labelText,
+    required String hintText,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.deepPurple.shade200),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.deepPurple.shade100),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.deepPurple.shade400, width: 2),
+        ),
+      ),
+      keyboardType: keyboardType,
+      validator: validator,
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _buildDatePickerField(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _selectDate(context),
+      child: AbsorbPointer(
+        child: TextFormField(
+          controller: dateController,
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.calendar_today, color: Colors.deepPurple),
+            labelText: 'Select Date',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInvoiceItemsTable() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columnSpacing: 20,
+          headingRowColor: MaterialStateColor.resolveWith(
+            (states) => Colors.deepPurple.shade50
+          ),
+          columns: const [
+            DataColumn(label: Text('Category', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Product', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Price', style: TextStyle(fontWeight: FontWeight.bold))),
+          ],
+          rows: invoiceList.map((invoice) {
+            double originalPrice = invoice['price'];
+            double discountedPrice = calculateDiscountedPrice(originalPrice, discount);
+            return DataRow(cells: [
+              DataCell(Text(invoice['category'])),
+              DataCell(Text(invoice['product'])),
+              DataCell(Text(invoice['quantity'].toString())),
+              DataCell(Text('\₹${discountedPrice.toStringAsFixed(2)}')),
+            ]);
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // Existing methods like buttonclicked() and _decrementProductStock() remain the same
 }

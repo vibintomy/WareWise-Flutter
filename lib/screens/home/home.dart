@@ -1,11 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:myproject1/db/functions/db_functions.dart';
 import 'package:myproject1/db/model/data_model.dart';
 import 'package:myproject1/screens/account/salesExpenses.dart';
 import 'package:myproject1/screens/home/inventorysummary.dart';
 import 'package:myproject1/screens/home/tabBar.dart';
+import 'package:myproject1/screens/home/widget/carousel.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -15,150 +15,104 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  int selectedindex = 0;
+  int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    geteditlist();
     return Scaffold(
-      body: SafeArea(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Color.fromARGB(255, 202, 195, 195),
+            ],
+          ),
+        ),
         child: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white,
-                  Color.fromARGB(255, 202, 195, 195),
-                ],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // Set the main axis size to min
-                children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Row(
-                      children: [
-                        ValueListenableBuilder<List<datamodels>>(
-                          valueListenable: editlistnotifier,
-                          builder: (BuildContext ctx, List<datamodels> editList,
-                              Widget? child) {
-                            if (editList.isEmpty) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            datamodels data = editList.last;
-                            return Row(
-                              children: [
-                                SizedBox(
-                                  height: 50,
-                                  width: 50,
-                                  child: CircleAvatar(
-                                    radius: 30,
-                                    backgroundColor:
-                                        const Color.fromARGB(255, 138, 26, 26),
-                                    backgroundImage: (data.image != null &&
-                                            data.image!.isNotEmpty)
-                                        ? FileImage(File(data.image!))
-                                        : null,
-                                    child: (data.image == null ||
-                                            data.image!.isEmpty)
-                                        ? const Icon(
-                                            Icons.person,
-                                            size: 50.0,
-                                            color: Colors.black,
-                                          )
-                                        : null,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Hi, ${data.username.toString().toUpperCase()}👋',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20),
-                                )
-                              ],
-                            );
-                          },
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with User Greeting
+                SafeArea(child: _buildHeader()),
+                const SizedBox(height: 30),
+
+                // Card Row for Sales Invoice and Income & Expenses
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: _buildCard(
+                        title: 'Sales Invoice',
+                        gradient: const LinearGradient(
+                          colors: [Colors.orangeAccent, Colors.deepOrange],
                         ),
-                        const Text(
-                          '',
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 87, 109, 255),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 35,
+                        icon: Icons.receipt_long,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const tabBarPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: _buildCard(
+                        title: 'Income & Expenses',
+                        gradient: const LinearGradient(
+                          colors: [Colors.purpleAccent, Colors.deepPurple],
+                        ),
+                        icon: Icons.trending_up,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ImprovedSalesExpenses(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                // Inventory Summary Card
+                Center(
+                  child: _buildCard(
+                    title: 'Inventory Summary',
+                    gradient: const LinearGradient(
+                      colors: [Colors.blueAccent, Colors.lightBlue],
+                    ),
+                    icon: Icons.inventory,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => InventorySummaryChart(
+                            getProductList: () async {
+                              return await getproductList();
+                            },
                           ),
                         ),
-                        const SizedBox(width: 190),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: _buildCard(
-                            title: 'SALES INVOICE',
-                            color: const Color.fromARGB(255, 251, 105, 20),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const tabBarPage(),
-                                ),
-                              );
-                            },
-                            image: Image.asset('assets/procurement.png')),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: _buildCard(
-                            title: 'Income & Expenses',
-                            color: const Color.fromARGB(255, 253, 79, 236),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SalesExpenses(),
-                                ),
-                              );
-                            },
-                            image: Image.asset(
-                                'assets/increase.png') // Icon for Income & Expenses
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Column(
-                    children: [
-                      _buildCard(
-                          title: 'Inventory summary',
-                          color: Colors.blue,
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const Inventorysummary()));
-                          },
-                          image: Image.asset('assets/supplier.png'))
-                    ],
-                  )
-                ],
-              ),
+                ),
+              const  SizedBox(height: 20,),
+              ProductCarousel(productListNotifier: productListNotifier)
+              ],
             ),
           ),
         ),
@@ -166,11 +120,83 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
+  // Header Widget
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        ValueListenableBuilder<List<datamodels>>(
+          valueListenable: editlistnotifier,
+          builder:
+              (BuildContext ctx, List<datamodels> editList, Widget? child) {
+            if (editList.isEmpty) {
+              return const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              );
+            }
+            datamodels data = editList.last;
+            return Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        (data.image != null && data.image!.isNotEmpty)
+                            ? FileImage(File(data.image!))
+                            : null,
+                    child: (data.image == null || data.image!.isEmpty)
+                        ? const Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.grey,
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      'Hi, ${data.username.toString().toUpperCase()} 👋',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // Enhanced Card Widget
   Widget _buildCard({
     required String title,
-    required Color color,
+    required LinearGradient gradient,
+    required IconData icon,
     required Function() onTap,
-    required Widget image,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -178,36 +204,42 @@ class _HomepageState extends State<Homepage> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         padding: const EdgeInsets.all(20.0),
-        margin: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15.0),
-          color: color,
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              blurRadius: 5.0,
-              offset: const Offset(2, 2),
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: image,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 40,
+                color: Colors.white,
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
-              ),
               textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.2,
+              ),
             ),
           ],
         ),
