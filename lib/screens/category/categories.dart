@@ -132,7 +132,7 @@ class _CategoriesState extends State<Categories> {
                                                   );
                                                 },
                                                 child: Container(
-                                                  height: 150,
+                                                  height: 160,
                                                   width: double.infinity,
                                                   decoration: BoxDecoration(
                                                     borderRadius:
@@ -158,34 +158,25 @@ class _CategoriesState extends State<Categories> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                           const         Row(
-                                                      children: [
-                                                        Text(
-                                                          'Item Name ',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
-                                                      ],
+                                                  Align(
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      
+                                                      data.items,
+                                                      style:const TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
+                                                  ),
                                                     const SizedBox(height: 2),
                                                     Row(
                                                       children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            data.items,
-                                                            style: const TextStyle(
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                          ),
-                                                        ),
+                                                       
                                                         Expanded(
                                                           child: IconButton(
-                                                            iconSize: 16,
+                                                            iconSize: 20,
                                                             onPressed: () {
                                                               Navigator.push(
                                                                 context,
@@ -209,7 +200,7 @@ class _CategoriesState extends State<Categories> {
                                                           ),
                                                         ),
                                                         IconButton(
-                                                          iconSize: 16,
+                                                          iconSize: 20,
                                                           onPressed: () {
                                                             showDialog(
                                                                 context:

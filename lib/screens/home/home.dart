@@ -111,6 +111,10 @@ class _HomepageState extends State<Homepage> {
                   ),
                 ),
               const  SizedBox(height: 20,),
+           const   Align(
+                alignment: Alignment.center,
+                child: Text('Top Products',style: TextStyle(fontWeight: FontWeight.w800,fontSize: 20),)),
+                  const  SizedBox(height: 10,),
               ProductCarousel(productListNotifier: productListNotifier)
               ],
             ),
