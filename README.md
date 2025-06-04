@@ -1,16 +1,34 @@
-# myproject1
+# 📦 WareWise – Inventory Management App
 
-A new Flutter project.
+**WareWise** is a smart and efficient inventory management application built using **Flutter**. It empowers a single user (admin) to manage products, categories, subcategories, and track daily sales and profits. The app also visualizes stock status with clear and interactive charts.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+### 🧑‍💼 Unified Admin/User
+- Acts as both user and admin
+- Full control over inventory and sales data
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🗃️ Product & Category Management
+- Add, update, and delete products
+- Create product **categories** and **subcategories**
+- Track **stock quantity**, **purchase date**, and **product details**
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 💰 Sales & Profit Tracking
+- Add daily sales data
+- Auto-calculate profits
+- Maintain historical sales records
+
+### 📊 Visual Charts
+- **Bar and Pie Charts** to display:
+  - Total stock vs out-of-stock products
+  - Daily/weekly/monthly sales
+  - Profit trends over time
+
+---
+
+## 🧱 Architecture
+
+The app follows a modular structure using **Local state management** and **Hive** for local data persistence. All features are built for offline functionality and fast access.
+
